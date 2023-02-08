@@ -47,23 +47,42 @@ const App = () => {
         filter shown with: <input value={newFilter} onChange={handleFilter} />
       </div>
       <h2>Add a new</h2>
-      <form onSubmit={addPerson}>
-        <div>
-          name: <input value={newName} onChange={handleNoteChange1} />
-        </div>
-        <div>
-          number: <input value={newPh} onChange={handleNoteChange2} />
-        </div>
-        <div>
-          <button type="submit">add</button>
-        </div>
-      </form>
+
+      <Form
+        handleFilter={handleFilter}
+        handleNoteChange1={handleNoteChange1}
+        handleNoteChange2={handleNoteChange2}
+        addPerson={addPerson}
+        newName={newName}
+        newPh={newPh}
+      />
       <h2>Numbers</h2>
       <Filter persons={persons} newFilter={newFilter} />
     </div>
   );
 };
-
+const Form = ({
+  handleFilter,
+  handleNoteChange1,
+  handleNoteChange2,
+  addPerson,
+  newName,
+  newPh,
+}) => {
+  return (
+    <form onSubmit={addPerson}>
+      <div>
+        name: <input value={newName} onChange={handleNoteChange1} />
+      </div>
+      <div>
+        number: <input value={newPh} onChange={handleNoteChange2} />
+      </div>
+      <div>
+        <button type="submit">add</button>
+      </div>
+    </form>
+  );
+};
 const Filter = ({ persons, newFilter }) => {
   const filteredPersons = persons.filter((person) =>
     person.name.toLowerCase().includes(newFilter.toLowerCase())
