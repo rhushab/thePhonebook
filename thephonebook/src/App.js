@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import personService from './services/persons';
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', ph: '040-123456' },
-    { name: 'Ada Lovelace', ph: '39-44-5323523' },
-    { name: 'Dan Abramov', ph: '12-43-234345' },
-    { name: 'Mary Poppendieck', ph: '39-23-6423122' },
-  ]);
+  useEffect(
+    () =>
+      personService
+        .getAll()
+        .then((initialPersons) => setPersons(initialPersons)),
+    []
+  );
+  const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState('');
   const [newPh, setNewPh] = useState('');
   const [newFilter, setNewFilter] = useState('');
@@ -23,6 +26,17 @@ const App = () => {
     console.log(event.target.value);
     setNewFilter(event.target.value);
   };
+
+  const deletePerson = (id) => {
+    const filteredPerson = persons.filter((person) => person.id === id);
+    const personName = filteredPerson[0].name;
+    const personId = filteredPerson[0].id;
+    if (window.confirm(`Delete ${personName} ?`)) {
+      personService.del(personId);
+      console.log(`${personName} successfully deleted`);
+      setPersons(persons.filter((person) => person.id !== personId));
+    }
+  };
   const addPerson = (event) => {
     // below line is prevent page refresh
     event.preventDefault();
@@ -34,9 +48,11 @@ const App = () => {
         name: newName,
         ph: newPh,
       };
-      setPersons(persons.concat(personObject));
-      setNewName('');
-      setNewPh('');
+      personService.create(personObject).then((returnedPerson) => {
+        setPersons(persons.concat(returnedPerson));
+        setNewName('');
+        setNewPh('');
+      });
     }
   };
 
@@ -57,10 +73,14 @@ const App = () => {
         newPh={newPh}
       />
       <h2>Numbers</h2>
-      <Filter persons={persons} newFilter={newFilter} />
+      <Filter
+        persons={persons}
+        newFilter={newFilter}
+        deletePerson={deletePerson}
+      />
     </div>
   );
-};
+}; //app ends
 const Form = ({
   handleFilter,
   handleNoteChange1,
@@ -82,8 +102,8 @@ const Form = ({
       </div>
     </form>
   );
-};
-const Filter = ({ persons, newFilter }) => {
+}; //form ends
+const Filter = ({ persons, newFilter, deletePerson }) => {
   const filteredPersons = persons.filter((person) =>
     person.name.toLowerCase().includes(newFilter.toLowerCase())
   );
@@ -93,10 +113,12 @@ const Filter = ({ persons, newFilter }) => {
       {filteredPersons.map((person) => (
         <p>
           {person.name} {person.ph}
+          <p>
+            <button onClick={() => deletePerson(person.id)}>delete</button>
+          </p>
         </p>
       ))}{' '}
     </div>
   );
 };
-
 export default App;
